@@ -9,24 +9,23 @@ AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates da
 * 📦 Load and analyze CSV datasets instantly
 * 📊 Dataset summary (rows, columns, duplicates, data types)
 * ⚠️ Automatic issue detection:
-
-  * Missing values
+  * Missing values (with significance threshold)
   * ID-like columns
-  * Incorrect data types (e.g., dates as strings)
+  * Incorrect data types (e.g., dates as strings, numeric-looking objects)
 * 🧠 Smart recommendations for data cleaning
-* 📈 Dataset Health Score (0–100) with breakdown
-* 📝 Export-ready HTML report with visualization
+* 📈 Dataset Health Score (0–100) with penalty breakdown
+* 🔗 Correlation table for numeric columns (highlights strong correlations)
+* 📝 Export-ready HTML report
 
 ---
 
 ## 🧠 Example Output
 
-* Health Score: **89.41 / 100 (Good)**
+* Health Score: **97.74 / 100 (Good)**
 * Identified issues:
-
   * ID columns detected
   * Date columns not parsed
-  * Missing values in dataset
+  * Minor missing values in Postal Code (0.11%)
 
 ---
 
@@ -37,17 +36,15 @@ AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates da
 ---
 
 ## ⚙️ Installation
-
 ```bash
 git clone https://github.com/ChiragSharma2026/autoeda-pro.git
 cd autoeda-pro
-pip install pandas matplotlib
+pip install pandas matplotlib scikit-learn
 ```
 
 ---
 
 ## ▶️ Usage
-
 ```bash
 python loader.py your_dataset.csv
 ```
@@ -59,11 +56,10 @@ python loader.py your_dataset.csv
 ---
 
 ## 📁 Project Structure
-
 ```
 autoeda-pro/
 │── loader.py            # Main entry point
-│── analyzer.py          # Dataset analysis
+│── analyzer.py          # Dataset analysis + correlations
 │── recommendations.py   # Suggestions engine
 │── health.py            # Scoring system
 │── report.py            # HTML report generator
@@ -82,9 +78,9 @@ AutoEDA focuses on:
 
 ## 🚧 Future Improvements
 
-* Correlation heatmaps
-* Advanced feature importance
-* CLI packaging
+* Distribution charts per column
+* CLI packaging (`pip install autoeda-pro`)
+* Feature importance (target column detection)
 * Web dashboard
 
 ---
