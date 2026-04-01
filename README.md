@@ -87,5 +87,5 @@ AutoEDA focuses on:
 
 ## 👨‍💻 Author
 
-**Chirag Sharma**
+**Chirag Sharma**  
 BTech CSE | Data Analytics & ML Enthusiast
