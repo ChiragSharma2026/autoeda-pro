@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 
 def generate_html_report(summary, recommendations, score, label, breakdown, df):
-    # -----------------------------
-    # Generate missing values chart
-    # -----------------------------
+
+    # Missing values chart
     missing = df.isnull().sum()
     missing = missing[missing > 0]
 
@@ -14,9 +13,6 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
         plt.savefig("missing.png")
         plt.close()
 
-    # -----------------------------
-    # Start HTML
-    # -----------------------------
     html = f"""
     <html>
     <head>
@@ -25,7 +21,7 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
             body {{ font-family: Arial; margin: 40px; }}
             h1 {{ color: #2c3e50; }}
             h2 {{ color: #34495e; }}
-            table {{ border-collapse: collapse; width: 60%; }}
+            table {{ border-collapse: collapse; width: 80%; margin-bottom: 20px; }}
             th, td {{ border: 1px solid #ccc; padding: 8px; text-align: left; }}
             th {{ background-color: #f2f2f2; }}
             .box {{ padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
@@ -47,20 +43,14 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
     </div>
     """
 
-    # -----------------------------
-    # Column Table
-    # -----------------------------
+    # Column table
     html += "<h2>Column Overview</h2><table>"
     html += "<tr><th>Column</th><th>Type</th></tr>"
-
     for col, dtype in summary['dtypes'].items():
         html += f"<tr><td>{col}</td><td>{dtype}</td></tr>"
-
     html += "</table>"
 
-    # -----------------------------
-    # Health Score
-    # -----------------------------
+    # Health score
     html += f"""
     <h2>Health Score</h2>
     <div class="box {label.lower()}">
@@ -69,19 +59,14 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
     </div>
     """
 
-    # -----------------------------
-    # Breakdown
-    # -----------------------------
+    # Score breakdown
     html += "<h2>Score Breakdown</h2><ul>"
     for k, v in breakdown.items():
         html += f"<li>{k}: -{v}</li>"
     html += "</ul>"
 
-    # -----------------------------
     # Recommendations
-    # -----------------------------
     html += "<h2>Recommendations</h2><ul>"
-
     for r in recommendations:
         if "DROPPING" in r:
             html += f"<li style='color:red;'>{r}</li>"
@@ -89,35 +74,50 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
             html += f"<li style='color:orange;'>{r}</li>"
         else:
             html += f"<li>{r}</li>"
-
     html += "</ul>"
 
-    # -----------------------------
-    # Next Steps (NEW)
-    # -----------------------------
+    # Next steps
     html += "<h2>Next Steps</h2><ul>"
-
     if breakdown["object_dtype_penalty"] > 0:
         html += "<li>Convert categorical/object columns for better analysis</li>"
-
     if breakdown["high_cardinality_penalty"] > 0:
         html += "<li>Remove or encode ID-like columns</li>"
-
     if breakdown["missing_penalty"] > 0:
         html += "<li>Handle missing values (imputation or removal)</li>"
-
     html += "</ul>"
 
-    # -----------------------------
-    # Chart (NEW)
-    # -----------------------------
-    if not missing.empty:
+    # Missing values chart (only if significant)
+    significant_missing = missing[missing > df.shape[0] * 0.01]
+    if not significant_missing.empty:
         html += "<h2>Missing Values Chart</h2>"
         html += "<img src='missing.png' width='600'>"
+    else:
+        html += "<h2>Missing Values</h2><p style='color:green;'>✅ No significant missing values detected.</p>"
 
-    # -----------------------------
-    # End HTML
-    # -----------------------------
+    # Correlation table
+    corr = summary.get("correlations", {})
+    if corr:
+        numeric_cols = list(corr.keys())
+        html += "<h2>Correlation Table (Numeric Columns)</h2>"
+        html += "<table><tr><th>Column</th>"
+        for col in numeric_cols:
+            html += f"<th>{col}</th>"
+        html += "</tr>"
+        for row_col in numeric_cols:
+            html += f"<tr><td><b>{row_col}</b></td>"
+            for col in numeric_cols:
+                val = corr[col].get(row_col, "")
+                try:
+                    fval = float(val)
+                    if abs(fval) > 0.7 and fval != 1.0:
+                        html += f"<td style='background:#f8d7da;'>{fval}</td>"
+                    else:
+                        html += f"<td>{fval}</td>"
+                except:
+                    html += f"<td>{val}</td>"
+            html += "</tr>"
+        html += "</table>"
+
     html += """
     </body>
     </html>

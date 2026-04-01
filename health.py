@@ -14,10 +14,10 @@ def compute_health_score(df):
         col_missing_ratio = df[col].isnull().mean()
 
         if col_missing_ratio > 0:
-            weight = 1
-
             # Reduce importance for ID-like columns
-            if "id" not in col.lower():
+            if "id" in col.lower():
+                weight = 0.5
+            else:
                 weight = 1.5
 
             missing_penalty += col_missing_ratio * 20 * weight
@@ -45,11 +45,18 @@ def compute_health_score(df):
     breakdown["high_cardinality_penalty"] = round(high_card_penalty, 2)
 
     # -----------------------------
-    # Object dtype penalty (unprocessed data)
+    # Object dtype penalty (smarter — only penalize numeric-looking object cols)
     # -----------------------------
-    object_cols = sum(df[col].dtype == 'object' for col in df.columns)
-    object_penalty = (object_cols / total_cols) * 10
+    numeric_looking_objects = 0
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            try:
+                df[col].dropna().astype(float)
+                numeric_looking_objects += 1
+            except (ValueError, TypeError):
+                pass
 
+    object_penalty = (numeric_looking_objects / total_cols) * 15
     score -= object_penalty
     breakdown["object_dtype_penalty"] = round(object_penalty, 2)
 
