@@ -32,7 +32,7 @@ AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates da
 
 ## 📸 Report Preview
 
-(Add screenshot here later)
+![Report Preview](report-preview.png)
 
 ---
 
