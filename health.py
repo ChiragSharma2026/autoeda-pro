@@ -5,16 +5,13 @@ def compute_health_score(df):
 
     breakdown = {}
 
-    # -----------------------------
-    # Missing values penalty (column-wise)
-    # -----------------------------
+
     missing_penalty = 0
 
     for col in df.columns:
         col_missing_ratio = df[col].isnull().mean()
 
         if col_missing_ratio > 0:
-            # Reduce importance for ID-like columns
             if "id" in col.lower():
                 weight = 0.5
             else:
@@ -25,9 +22,6 @@ def compute_health_score(df):
     score -= missing_penalty
     breakdown["missing_penalty"] = round(missing_penalty, 2)
 
-    # -----------------------------
-    # Duplicate rows penalty
-    # -----------------------------
     duplicates = df.duplicated().sum()
     duplicate_ratio = duplicates / total_rows
     duplicate_penalty = duplicate_ratio * 20
@@ -35,18 +29,12 @@ def compute_health_score(df):
     score -= duplicate_penalty
     breakdown["duplicate_penalty"] = round(duplicate_penalty, 2)
 
-    # -----------------------------
-    # High cardinality penalty (ID-like columns)
-    # -----------------------------
     high_card_cols = sum(df[col].nunique() == total_rows for col in df.columns)
     high_card_penalty = (high_card_cols / total_cols) * 40
 
     score -= high_card_penalty
     breakdown["high_cardinality_penalty"] = round(high_card_penalty, 2)
 
-    # -----------------------------
-    # Object dtype penalty (smarter — only penalize numeric-looking object cols)
-    # -----------------------------
     numeric_looking_objects = 0
     for col in df.columns:
         if df[col].dtype == 'object':
@@ -60,14 +48,8 @@ def compute_health_score(df):
     score -= object_penalty
     breakdown["object_dtype_penalty"] = round(object_penalty, 2)
 
-    # -----------------------------
-    # Final score clamp
-    # -----------------------------
     score = max(0, round(score, 2))
 
-    # -----------------------------
-    # Label interpretation
-    # -----------------------------
     if score >= 85:
         label = "Good"
     elif score >= 60:
