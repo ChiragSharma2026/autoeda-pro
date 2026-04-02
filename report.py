@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
+from insights import generate_feature_importance
 
-def generate_html_report(summary, recommendations, score, label, breakdown, df):
+def generate_html_report(summary, recommendations, score, label, breakdown, df, target=None):
 
     # Missing values chart
     missing = df.isnull().sum()
@@ -136,6 +137,21 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
     for col in numeric_cols:
         html += f"<h3>{col}</h3>"
         html += f"<img src='dist_{col}.png' width='500'><br><br>"
+
+    # Feature importance section
+    if target:
+        importance_df = generate_feature_importance(df, target)
+        if importance_df is not None:
+            html += "<h2>🎯 Feature Importance</h2>"
+            html += f"<p>Target column: <b>{target}</b></p>"
+            html += "<img src='feature_importance.png' width='600'><br><br>"
+            html += "<table><tr><th>Feature</th><th>Importance Score</th></tr>"
+            for _, row in importance_df.iterrows():
+                html += f"<tr><td>{row['Feature']}</td><td>{row['Importance']:.4f}</td></tr>"
+            html += "</table>"
+        else:
+            html += "<h2>🎯 Feature Importance</h2>"
+            html += f"<p style='color:orange;'>Could not compute feature importance for target: <b>{target}</b></p>"
 
     html += """
     </body>

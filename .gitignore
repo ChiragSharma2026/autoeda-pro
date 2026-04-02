@@ -3,3 +3,5 @@ __pycache__/
 missing.png
 *.html
 *.csv
+dist_*.png
+feature_importance.png

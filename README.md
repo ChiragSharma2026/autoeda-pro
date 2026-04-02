@@ -15,17 +15,20 @@ AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates da
 * 🧠 Smart recommendations for data cleaning
 * 📈 Dataset Health Score (0–100) with penalty breakdown
 * 🔗 Correlation table for numeric columns (highlights strong correlations)
+* 📊 Distribution charts for all numeric columns
+* 🎯 Feature importance (specify a target column for ML insights)
 * 📝 Export-ready HTML report
 
 ---
 
-## 🧠 Example Output
+## 🧠 Example Output (Titanic Dataset)
 
-* Health Score: **97.74 / 100 (Good)**
+* Health Score: **64.18 / 100 (Moderate)**
 * Identified issues:
-  * ID columns detected
-  * Date columns not parsed
-  * Minor missing values in Postal Code (0.11%)
+  * Cabin: 77.1% missing → DROP recommended
+  * Age: 19.87% missing → needs imputation
+  * PassengerId, Name detected as ID columns → excluded from analysis
+* Top features influencing `Survived`: **Fare, Pclass, Age**
 
 ---
 
@@ -45,23 +48,34 @@ pip install pandas matplotlib scikit-learn
 ---
 
 ## ▶️ Usage
+
+**Basic analysis:**
 ```bash
 python loader.py your_dataset.csv
 ```
 
-👉 This generates:
+**With feature importance:**
+```bash
+python loader.py your_dataset.csv --target ColumnName
+```
 
-* `report.html` (open in browser)
+👉 Both generate `report.html` — open in any browser.
+
+**Example:**
+```bash
+python loader.py titanic.csv --target Survived
+```
 
 ---
 
 ## 📁 Project Structure
 ```
 autoeda-pro/
-│── loader.py            # Main entry point
+│── loader.py            # Main entry point + CLI
 │── analyzer.py          # Dataset analysis + correlations
 │── recommendations.py   # Suggestions engine
 │── health.py            # Scoring system
+│── insights.py          # Feature importance (RandomForest)
 │── report.py            # HTML report generator
 ```
 
@@ -78,10 +92,9 @@ AutoEDA focuses on:
 
 ## 🚧 Future Improvements
 
-* Distribution charts per column
 * CLI packaging (`pip install autoeda-pro`)
-* Feature importance (target column detection)
-* Web dashboard
+* Web dashboard (Streamlit)
+* SHAP-based explainability
 
 ---
 

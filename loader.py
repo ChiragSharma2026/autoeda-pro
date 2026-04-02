@@ -1,5 +1,5 @@
 import pandas as pd
-import sys
+import argparse
 from analyzer import analyze
 from recommendations import generate_recommendations
 from health import compute_health_score
@@ -11,7 +11,12 @@ def load_csv(path):
     return df
 
 if __name__ == "__main__":
-    df = load_csv(sys.argv[1])
+    parser = argparse.ArgumentParser(description="AutoEDA - Automated Dataset Analysis")
+    parser.add_argument("file", help="Path to CSV file")
+    parser.add_argument("--target", help="Target column for feature importance", default=None)
+    args = parser.parse_args()
+
+    df = load_csv(args.file)
     summary = analyze(df)
 
     print("\n--- Dataset Summary ---")
@@ -33,5 +38,5 @@ if __name__ == "__main__":
     for k, v in breakdown.items():
         print(f"{k}: -{v}")
 
-    generate_html_report(summary, recs, health_score, label, breakdown, df)
+    generate_html_report(summary, recs, health_score, label, breakdown, df, target=args.target)
     print("\nReport saved as report.html")
