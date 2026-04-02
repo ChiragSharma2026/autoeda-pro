@@ -13,6 +13,18 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
         plt.savefig("missing.png")
         plt.close()
 
+    # Distribution charts for numeric columns
+    numeric_cols = df.select_dtypes(include='number').columns
+    for col in numeric_cols:
+        plt.figure()
+        df[col].dropna().hist(bins=30, color='steelblue', edgecolor='white')
+        plt.title(f"Distribution: {col}")
+        plt.xlabel(col)
+        plt.ylabel("Frequency")
+        plt.tight_layout()
+        plt.savefig(f"dist_{col}.png")
+        plt.close()
+
     html = f"""
     <html>
     <head>
@@ -21,6 +33,7 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
             body {{ font-family: Arial; margin: 40px; }}
             h1 {{ color: #2c3e50; }}
             h2 {{ color: #34495e; }}
+            h3 {{ color: #555; }}
             table {{ border-collapse: collapse; width: 80%; margin-bottom: 20px; }}
             th, td {{ border: 1px solid #ccc; padding: 8px; text-align: left; }}
             th {{ background-color: #f2f2f2; }}
@@ -86,7 +99,7 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
         html += "<li>Handle missing values (imputation or removal)</li>"
     html += "</ul>"
 
-    # Missing values chart (only if significant)
+    # Missing values
     significant_missing = missing[missing > df.shape[0] * 0.01]
     if not significant_missing.empty:
         html += "<h2>Missing Values Chart</h2>"
@@ -97,15 +110,15 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
     # Correlation table
     corr = summary.get("correlations", {})
     if corr:
-        numeric_cols = list(corr.keys())
+        numeric_cols_list = list(corr.keys())
         html += "<h2>Correlation Table (Numeric Columns)</h2>"
         html += "<table><tr><th>Column</th>"
-        for col in numeric_cols:
+        for col in numeric_cols_list:
             html += f"<th>{col}</th>"
         html += "</tr>"
-        for row_col in numeric_cols:
+        for row_col in numeric_cols_list:
             html += f"<tr><td><b>{row_col}</b></td>"
-            for col in numeric_cols:
+            for col in numeric_cols_list:
                 val = corr[col].get(row_col, "")
                 try:
                     fval = float(val)
@@ -117,6 +130,12 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df):
                     html += f"<td>{val}</td>"
             html += "</tr>"
         html += "</table>"
+
+    # Distribution charts
+    html += "<h2>📊 Distributions (Numeric Columns)</h2>"
+    for col in numeric_cols:
+        html += f"<h3>{col}</h3>"
+        html += f"<img src='dist_{col}.png' width='500'><br><br>"
 
     html += """
     </body>
