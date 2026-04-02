@@ -1,4 +1,8 @@
 def compute_health_score(df):
+    """
+    Computes a dataset health score from 0-100.
+    Returns: (score, label, breakdown)
+    """
     score = 100
     total_rows = df.shape[0]
     total_cols = df.shape[1]
