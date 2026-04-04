@@ -61,6 +61,12 @@ python loader.py your_dataset.csv --target ColumnName
 
 👉 Both generate `report.html` — open in any browser.
 
+**Web Dashboard:**
+```bash
+streamlit run app.py
+```
+Upload any CSV and explore interactively in your browser.
+
 **Example:**
 ```bash
 python loader.py titanic.csv --target Survived
