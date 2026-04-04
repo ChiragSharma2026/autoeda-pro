@@ -77,6 +77,7 @@ python loader.py titanic.csv --target Survived
 ## 📁 Project Structure
 ```
 autoeda-pro/
+│── app.py               # Streamlit web dashboard
 │── loader.py            # Main entry point + CLI
 │── analyzer.py          # Dataset analysis + correlations
 │── recommendations.py   # Suggestions engine
