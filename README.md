@@ -1,6 +1,7 @@
 # 📊 AutoEDA — Automated Dataset Analysis & Quality Scoring
 
 AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates data quality, and generates a clean HTML report with actionable insights.
+🌐 **Live Demo:** [autoeda-pro.streamlit.app](https://autoeda-pro.streamlit.app)
 
 ---
 
