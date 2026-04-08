@@ -5,6 +5,7 @@ from recommendations import generate_recommendations
 from health import compute_health_score
 from insights import generate_feature_importance
 import matplotlib.pyplot as plt
+import os
 
 st.set_page_config(page_title="AutoEDA", page_icon="📊", layout="wide")
 
@@ -122,39 +123,41 @@ if uploaded_file:
     st.markdown("<div class='section-header'><h2>🎯 Feature Importance</h2></div>", unsafe_allow_html=True)
     st.info("💡 Select a numeric or low-cardinality column as target (e.g. Survived, Price, Category)")
     target = st.selectbox("Select target column", options=df.columns)
+
     if st.button("Run Feature Importance", type="primary"):
         with st.spinner("Training model..."):
             importance_df = generate_feature_importance(df, target)
         if importance_df is not None:
-            st.dataframe(importance_df, use_container_width=True)
-            fig, ax = plt.subplots(figsize=(6, 3))
-            ax.barh(importance_df["Feature"][:10][::-1],
-                    importance_df["Importance"][:10][::-1],
-                    color='#4da6ff')
-            ax.set_title(f"Feature Importance → {target}", color='white')
-            ax.set_xlabel("Importance Score", color='white')
-            ax.set_facecolor('#1e2130')
-            fig.patch.set_facecolor('#1e2130')
-            ax.tick_params(colors='white')
-            st.pyplot(fig, use_container_width=False)
-            plt.close()
+            st.session_state['importance_df'] = importance_df
+            st.session_state['importance_target'] = target
         else:
             st.warning(f"Could not compute feature importance for: **{target}**")
-    
-        # Download Report
+
+    if 'importance_df' in st.session_state:
+        importance_df = st.session_state['importance_df']
+        imp_target = st.session_state['importance_target']
+        st.dataframe(importance_df, use_container_width=True)
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.barh(importance_df["Feature"][:10][::-1],
+                importance_df["Importance"][:10][::-1],
+                color='#4da6ff')
+        ax.set_title(f"Feature Importance → {imp_target}", color='white')
+        ax.set_xlabel("Importance Score", color='white')
+        ax.set_facecolor('#1e2130')
+        fig.patch.set_facecolor('#1e2130')
+        ax.tick_params(colors='white')
+        st.pyplot(fig, use_container_width=False)
+        plt.close()
+
+    # Download Report
     st.markdown("<div class='section-header'><h2>⬇️ Download Report</h2></div>", unsafe_allow_html=True)
-    
+
     from report import generate_html_report
-    from analyzer import analyze
-    
+
     summary = analyze(df)
-    recs = generate_recommendations(df)
-    score, label, breakdown = compute_health_score(df)
-    
-    # Generate HTML string
-    import io, os
-    generate_html_report(summary, recs, score, label, breakdown, df, target=target)
-    
+    dl_target = st.session_state.get('importance_target', None)
+    generate_html_report(summary, recs, score, label, breakdown, df, target=dl_target)
+
     if os.path.exists("report.html"):
         with open("report.html", "r", encoding="utf-8") as f:
             html_content = f.read()
