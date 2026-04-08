@@ -34,4 +34,11 @@ def generate_recommendations(df):
                 direction = "right" if skewness > 0 else "left"
                 recommendations.append(f"{col}: highly skewed ({direction}, skew={skewness:.2f}) → consider log transformation")
 
+        # Class imbalance detection for low cardinality columns
+        if df[col].nunique() == 2 or (df[col].nunique() <= 10 and df[col].dtype in ['int64', 'object']):
+            value_counts = df[col].value_counts(normalize=True) * 100
+            majority = value_counts.iloc[0]
+            if majority > 75:
+                recommendations.append(f"{col}: class imbalance detected ({majority:.1f}% dominant class) → consider resampling if used as target")
+
     return recommendations
