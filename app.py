@@ -140,6 +140,31 @@ if uploaded_file:
             plt.close()
         else:
             st.warning(f"Could not compute feature importance for: **{target}**")
+    
+        # Download Report
+    st.markdown("<div class='section-header'><h2>⬇️ Download Report</h2></div>", unsafe_allow_html=True)
+    
+    from report import generate_html_report
+    from analyzer import analyze
+    
+    summary = analyze(df)
+    recs = generate_recommendations(df)
+    score, label, breakdown = compute_health_score(df)
+    
+    # Generate HTML string
+    import io, os
+    generate_html_report(summary, recs, score, label, breakdown, df)
+    
+    if os.path.exists("report.html"):
+        with open("report.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        st.download_button(
+            label="📥 Download HTML Report",
+            data=html_content,
+            file_name="autoeda_report.html",
+            mime="text/html",
+            type="primary"
+        )
 
 else:
     st.markdown("""
