@@ -32,6 +32,11 @@ def generate_feature_importance(df, target_col):
         print("No numeric feature columns available for feature importance.")
         return None
 
+    # Reject high cardinality object columns as target
+    if y.dtype == 'object' and y.nunique() > 20:
+        print(f"Target '{target_col}' has too many unique categories ({y.nunique()}) — not suitable for feature importance.")
+        return None
+
     # Detect if classification or regression
     is_classification = y.dtype == 'object' or y.nunique() < 20
 

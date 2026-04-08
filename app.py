@@ -70,6 +70,7 @@ if uploaded_file:
 
     # Feature Importance
     st.header("🎯 Feature Importance")
+    st.info("💡 Select a numeric or low-cardinality column as target (e.g. Survived, Price, Category)")
     target = st.selectbox("Select target column", options=df.columns)
     if st.button("Run Feature Importance"):
         importance_df = generate_feature_importance(df, target)
