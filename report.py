@@ -1,5 +1,15 @@
 import matplotlib.pyplot as plt
+import base64
+import io
 from insights import generate_feature_importance
+
+def fig_to_base64(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    encoded = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return encoded
 
 def generate_html_report(summary, recommendations, score, label, breakdown, df, target=None):
 
@@ -7,23 +17,26 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
     missing = df.isnull().sum()
     missing = missing[missing > 0]
 
+    missing_img = ""
     if not missing.empty:
-        missing.plot(kind='bar')
-        plt.title("Missing Values per Column")
+        fig, ax = plt.subplots()
+        missing.plot(kind='bar', ax=ax)
+        ax.set_title("Missing Values per Column")
         plt.tight_layout()
-        plt.savefig("missing.png")
+        missing_img = fig_to_base64(fig)
         plt.close()
 
-    # Distribution charts for numeric columns
+    # Distribution charts
     numeric_cols = df.select_dtypes(include='number').columns
+    dist_imgs = {}
     for col in numeric_cols:
-        plt.figure()
-        df[col].dropna().hist(bins=30, color='steelblue', edgecolor='white')
-        plt.title(f"Distribution: {col}")
-        plt.xlabel(col)
-        plt.ylabel("Frequency")
+        fig, ax = plt.subplots()
+        df[col].dropna().hist(bins=30, ax=ax, color='steelblue', edgecolor='white')
+        ax.set_title(f"Distribution: {col}")
+        ax.set_xlabel(col)
+        ax.set_ylabel("Frequency")
         plt.tight_layout()
-        plt.savefig(f"dist_{col}.png")
+        dist_imgs[col] = fig_to_base64(fig)
         plt.close()
 
     html = f"""
@@ -45,7 +58,6 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
         </style>
     </head>
     <body>
-
     <h1>📊 AutoEDA Report</h1>
     <p>Automated Dataset Analysis & Quality Assessment</p>
 
@@ -100,11 +112,10 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
         html += "<li>Handle missing values (imputation or removal)</li>"
     html += "</ul>"
 
-    # Missing values
+    # Missing values chart
     significant_missing = missing[missing > df.shape[0] * 0.01]
-    if not significant_missing.empty:
-        html += "<h2>Missing Values Chart</h2>"
-        html += "<img src='missing.png' width='600'>"
+    if not significant_missing.empty and missing_img:
+        html += f"<h2>Missing Values Chart</h2><img src='data:image/png;base64,{missing_img}' width='600'>"
     else:
         html += "<h2>Missing Values</h2><p style='color:green;'>✅ No significant missing values detected.</p>"
 
@@ -135,28 +146,32 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
     # Distribution charts
     html += "<h2>📊 Distributions (Numeric Columns)</h2>"
     for col in numeric_cols:
-        html += f"<h3>{col}</h3>"
-        html += f"<img src='dist_{col}.png' width='500'><br><br>"
+        if col in dist_imgs:
+            html += f"<h3>{col}</h3><img src='data:image/png;base64,{dist_imgs[col]}' width='500'><br><br>"
 
-    # Feature importance section
+    # Feature importance
     if target:
         importance_df = generate_feature_importance(df, target)
         if importance_df is not None:
-            html += "<h2>🎯 Feature Importance</h2>"
+            fig, ax = plt.subplots(figsize=(8, 4))
+            ax.barh(importance_df["Feature"][:10][::-1],
+                    importance_df["Importance"][:10][::-1],
+                    color='steelblue')
+            ax.set_title(f"Feature Importance → Target: {target}")
+            ax.set_xlabel("Importance Score")
+            plt.tight_layout()
+            fi_img = fig_to_base64(fig)
+            plt.close()
+
+            html += f"<h2>🎯 Feature Importance</h2>"
             html += f"<p>Target column: <b>{target}</b></p>"
-            html += "<img src='feature_importance.png' width='600'><br><br>"
+            html += f"<img src='data:image/png;base64,{fi_img}' width='600'><br><br>"
             html += "<table><tr><th>Feature</th><th>Importance Score</th></tr>"
             for _, row in importance_df.iterrows():
                 html += f"<tr><td>{row['Feature']}</td><td>{row['Importance']:.4f}</td></tr>"
             html += "</table>"
-        else:
-            html += "<h2>🎯 Feature Importance</h2>"
-            html += f"<p style='color:orange;'>Could not compute feature importance for target: <b>{target}</b></p>"
 
-    html += """
-    </body>
-    </html>
-    """
+    html += "</body></html>"
 
     with open("report.html", "w", encoding="utf-8") as f:
         f.write(html)

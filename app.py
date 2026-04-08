@@ -153,7 +153,7 @@ if uploaded_file:
     
     # Generate HTML string
     import io, os
-    generate_html_report(summary, recs, score, label, breakdown, df)
+    generate_html_report(summary, recs, score, label, breakdown, df, target=target)
     
     if os.path.exists("report.html"):
         with open("report.html", "r", encoding="utf-8") as f:
