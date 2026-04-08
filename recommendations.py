@@ -27,4 +27,11 @@ def generate_recommendations(df):
             if "date" in col.lower():
                 recommendations.append(f"{col}: appears to be date → convert to datetime")
 
+        # Skewness detection for numeric columns
+        if df[col].dtype in ['float64', 'int64']:
+            skewness = df[col].dropna().skew()
+            if abs(skewness) > 1:
+                direction = "right" if skewness > 0 else "left"
+                recommendations.append(f"{col}: highly skewed ({direction}, skew={skewness:.2f}) → consider log transformation")
+
     return recommendations
