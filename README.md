@@ -107,9 +107,8 @@ AutoEDA focuses on:
 ---
 
 ## 🚧 Future Improvements
-* CLI packaging (`pip install autoeda-pro`)
+* Publish to PyPI (`pip install autoeda-pro`)
 * SHAP-based explainability
-* Deploy to Streamlit Cloud (public URL)
 
 ---
 
