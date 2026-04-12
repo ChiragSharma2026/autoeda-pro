@@ -130,6 +130,10 @@ if uploaded_file:
         if importance_df is not None:
             st.session_state['importance_df'] = importance_df
             st.session_state['importance_target'] = target
+            # Store SHAP chart as bytes in session state
+            if os.path.exists("shap_summary.png"):
+                with open("shap_summary.png", "rb") as f:
+                    st.session_state['shap_img'] = f.read()
         else:
             st.warning(f"Could not compute feature importance for: **{target}**")
 
@@ -150,9 +154,9 @@ if uploaded_file:
         plt.close()
 
         # SHAP chart
-        if os.path.exists("shap_summary.png"):
+        if 'shap_img' in st.session_state:
             st.markdown("#### 🔍 SHAP Explainability")
-            st.image("shap_summary.png", width=600)
+            st.image(st.session_state['shap_img'], width=600)
             st.caption("Mean |SHAP Value| — how much each feature influences the prediction on average")
 
     # Download Report
