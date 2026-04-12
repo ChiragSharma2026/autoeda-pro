@@ -105,13 +105,6 @@ Most EDA tools give statistics.
 AutoEDA focuses on:
 👉 **actionable insights + dataset quality scoring**
 
----
-
-## 🚧 Future Improvements
-* Publish to PyPI (`pip install autoeda-pro`)
-
----
-
 ## 👨‍💻 Author
 
 **Chirag Sharma**  
