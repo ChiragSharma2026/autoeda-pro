@@ -18,6 +18,7 @@ AutoEDA is a lightweight tool that automatically analyzes datasets, evaluates da
 * 🔗 Correlation table for numeric columns (highlights strong correlations)
 * 📊 Distribution charts for all numeric columns
 * 🎯 Feature importance (specify a target column for ML insights)
+* 🔍 SHAP explainability (mean |SHAP value| per feature)
 * 📝 Export-ready HTML report
 
 ---
