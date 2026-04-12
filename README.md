@@ -109,7 +109,6 @@ AutoEDA focuses on:
 
 ## 🚧 Future Improvements
 * Publish to PyPI (`pip install autoeda-pro`)
-* SHAP-based explainability
 
 ---
 
