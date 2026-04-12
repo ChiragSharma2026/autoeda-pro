@@ -48,6 +48,14 @@ pip install pandas matplotlib scikit-learn
 
 ---
 
+**Install locally:**
+```bash
+pip install -e .
+autoeda your_data.csv
+autoeda your_data.csv --target ColumnName
+```
+
+
 ## ▶️ Usage
 
 **Basic analysis:**
