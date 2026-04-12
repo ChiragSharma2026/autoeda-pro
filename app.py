@@ -149,6 +149,12 @@ if uploaded_file:
         st.pyplot(fig, use_container_width=False)
         plt.close()
 
+        # SHAP chart
+        if os.path.exists("shap_summary.png"):
+            st.markdown("#### 🔍 SHAP Explainability")
+            st.image("shap_summary.png", width=600)
+            st.caption("Mean |SHAP Value| — how much each feature influences the prediction on average")
+
     # Download Report
     st.markdown("<div class='section-header'><h2>⬇️ Download Report</h2></div>", unsafe_allow_html=True)
 

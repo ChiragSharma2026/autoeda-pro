@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import base64
 import io
+import os
 from insights import generate_feature_importance
 
 def fig_to_base64(fig):
@@ -149,7 +150,7 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
         if col in dist_imgs:
             html += f"<h3>{col}</h3><img src='data:image/png;base64,{dist_imgs[col]}' width='500'><br><br>"
 
-    # Feature importance
+    # Feature importance + SHAP
     if target:
         importance_df = generate_feature_importance(df, target)
         if importance_df is not None:
@@ -170,6 +171,14 @@ def generate_html_report(summary, recommendations, score, label, breakdown, df, 
             for _, row in importance_df.iterrows():
                 html += f"<tr><td>{row['Feature']}</td><td>{row['Importance']:.4f}</td></tr>"
             html += "</table>"
+
+            # SHAP chart
+            if os.path.exists("shap_summary.png"):
+                with open("shap_summary.png", "rb") as f:
+                    shap_b64 = base64.b64encode(f.read()).decode('utf-8')
+                html += "<h3>🔍 SHAP Explainability</h3>"
+                html += f"<img src='data:image/png;base64,{shap_b64}' width='600'><br><br>"
+                html += "<p><i>Mean |SHAP Value| — how much each feature influences the prediction on average.</i></p>"
 
     html += "</body></html>"
 
